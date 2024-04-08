@@ -36174,7 +36174,7 @@ const date_holidays_1 = __importDefault(__nccwpck_require__(740));
  */
 async function run() {
     try {
-        const eventTypes = core.getInput('event_type', { required: true });
+        const eventTypes = core.getInput('event_types', { required: true });
         const noDeploymentDays = core.getInput('no_deployment_days', {
             required: true
         });

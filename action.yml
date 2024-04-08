@@ -11,7 +11,7 @@ branding:
 inputs:
   event_types:
     description: 'github actions event types to monitor'
-    required: false
+    required: true
     default: 'push,pull_request'
   no_deployment_days:
     description: 'Day of week to not allow deployment for'
