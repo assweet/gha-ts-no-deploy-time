@@ -1,6 +1,6 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'No deploy time'
+description: 'Select not to deploy at specific time'
+author: 'Lim Swee Tat, Abnormal Security'
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
@@ -9,15 +9,45 @@ branding:
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  event_types:
+    description: 'github actions event types to monitor'
     required: true
-    default: '1000'
+    default: 'push'
+  no_deployment_days:
+    description: 'Day of week to not allow deployment for'
+    required: true
+    default: 'Friday,Saturday,Sunday'
+  tz:
+    description:
+      'Time zone in the format (Continent/Country) - eg. Asia/Singapore'
+    required: true
+    default: 'Asia/Singapore'
+  country:
+    description: 'Country in ISO 2 character'
+    required: false
+    default: 'SG'
+  state:
+    description:
+      'state in the country as specified in dates-holiday npm package'
+    required: false
+  region:
+    description:
+      'region for the state in the country as specified in dates-holiday npm
+      package'
+    required: false
+  office_hours_start:
+    description: 'office hours start of the day in 24 hours format'
+    required: false
+  office_hours_end:
+    description: 'office hours end of the day in 24 hours format'
+    required: false
 
 # Define your outputs here.
 outputs:
-  time:
-    description: 'Your output description here'
+  reason:
+    description: 'Reason to be used for deciding action taken'
+  should_deploy:
+    description: 'Boolean to decide if job should deploy'
 
 runs:
   using: node20

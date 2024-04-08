@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
 import Holidays from 'date-holidays'
 
 /**
@@ -7,6 +8,7 @@ import Holidays from 'date-holidays'
  */
 export async function run(): Promise<void> {
   try {
+    const eventTypes: string = core.getInput('event_type', { required: true })
     const noDeploymentDays: string = core.getInput('no_deployment_days', {
       required: true
     })
@@ -18,6 +20,7 @@ export async function run(): Promise<void> {
     const officeHoursEnd: string = core.getInput('office_hours_end')
 
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
+    core.debug(`eventTypes: "${eventTypes}"`)
     core.debug(`noDeploymentDays: "${noDeploymentDays}"`)
     core.debug(`tz: "${tz}"`)
     core.debug(`country: "${country}"`)
@@ -25,6 +28,15 @@ export async function run(): Promise<void> {
     core.debug(`region: "${region}"`)
     core.debug(`officeHoursStart: "${officeHoursStart}"`)
     core.debug(`officeHoursEnd: "${officeHoursEnd}"`)
+
+    // Run this only for events listed in eventTypes
+    const eventName = `,${github.context.eventName.trim().toLowerCase()},`
+    const eventTypesComma = `,${eventTypes.trim().toLowerCase()},`
+    if (eventTypesComma.includes(eventName)) {
+      core.setOutput('reason', 'Should Deploy')
+      core.setOutput('should_deploy', true)
+      return
+    }
 
     // Log the current timestamp
     const today: Date = new Date()
@@ -38,12 +50,12 @@ export async function run(): Promise<void> {
         weekday: 'long'
       })
       core.info(`tzTodayDay: "${tzTodayDay}"`)
-      const noDeploymentDaysCommas: string = `,${noDeploymentDays.toLowerCase()},`
-      const foundDeploymentDay: number = noDeploymentDaysCommas.indexOf(
+      const noDeploymentDaysCommas = `,${noDeploymentDays.toLowerCase()},`
+      const foundDeploymentDay: boolean = noDeploymentDaysCommas.includes(
         `,${tzTodayDay.toLowerCase()},`
       )
       core.debug(`foundDeploymentDay: "${foundDeploymentDay}"`)
-      if (foundDeploymentDay > -1) {
+      if (foundDeploymentDay) {
         // We found it in a noDeploymentDays
         core.setOutput(
           'reason',
