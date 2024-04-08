@@ -8,7 +8,8 @@ import Holidays from 'date-holidays'
  */
 export async function run(): Promise<void> {
   try {
-    const eventTypes: string = core.getInput('event_types', { required: true })
+    const eventTypes: string =
+      core.getInput('event_types') || 'push,pull_request'
     const noDeploymentDays: string = core.getInput('no_deployment_days', {
       required: true
     })
