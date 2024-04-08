@@ -57,6 +57,7 @@ jobs:
         id: test-action
         uses: ./
         with:
+          event_types: push,pull_request
           no_deployment_days: Friday,Saturday,Sunday
           tz: Asia/Singapore
           country: SG
