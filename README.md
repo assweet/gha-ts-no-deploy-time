@@ -55,3 +55,10 @@ npm install
 
 INPUT_NO_DEPLOYMENT_DAYS=Friday,Saturday,Sunday INPUT_TZ=Asia/Singapore INPUT_COUNTRY=SG INPUT_STATE=SG INPUT_REGION=SG  INPUT_OFFICE_HOURS_START=9 INPUT_OFFICE_HOURS_END=22 npx ts-node src/index.ts
 ```
+
+## Performing release
+
+1. Commit changes
+2. `git push -u origin releases/v1`
+3. `gh pr create --title "[No Deploy] Release me" --label abnormal`
+4. Approve the PR, and merge the PR into the `main` branch

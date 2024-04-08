@@ -57,8 +57,16 @@ jobs:
         id: test-action
         uses: ./
         with:
-          milliseconds: 2000
+          no_deployment_days: Friday,Saturday,Sunday
+          tz: Asia/Singapore
+          country: SG
+          state: SG
+          region: SG
+          office_hours_start: 9
+          office_hours_end: 22
 
       - name: Print Output
         id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
+        run:
+          echo "${{ steps.test-action.outputs.reason}} - ${{
+          steps.test-action.outputs.should_deploy }}"
