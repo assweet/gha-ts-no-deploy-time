@@ -59,7 +59,7 @@ jobs:
         with:
           event_types: push,pull_request
           no_deployment_days: Friday,Saturday,Sunday
-          tz: Asia/Singapore
+          tz: '+8'
           country: SG
           state: SG
           region: SG
