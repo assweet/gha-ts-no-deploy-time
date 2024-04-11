@@ -1,4 +1,4 @@
-# Create a GitHub Action Using TypeScript
+# Weekend and Office Hour saver for Github Actions
 
 [![GitHub Super-Linter](https://github.com/assweet/gha-ts-no-deploy-time/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
 ![CI](https://github.com/assweet/gha-ts-no-deploy-time/actions/workflows/ci.yml/badge.svg)
@@ -25,7 +25,7 @@ steps:
     id: should-deploy
     with:
       no_deployment_days: Friday,Saturday,Sunday
-      tz: Asia/Singapore
+      tz: "+8"
       country: SG
       state: SG
       region: SG
