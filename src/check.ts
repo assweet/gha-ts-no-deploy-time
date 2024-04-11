@@ -1,3 +1,4 @@
+import * as core from '@actions/core'
 import Holidays from 'date-holidays'
 
 /**
@@ -34,6 +35,9 @@ export function convertDateTz(
   ]
   const resultDayOfWeekInt: number = resultDate.getDay()
   const resultDayOfWeek: string = weekday[resultDayOfWeekInt]
+  core.info(
+    `convertDateTz returns [${resultDate}, ${resultHour}, ${resultDayOfWeek}]`
+  )
 
   return [resultDate, resultHour, resultDayOfWeek]
 }
