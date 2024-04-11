@@ -36132,6 +36132,107 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 682:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkHolidays = exports.checkOfficeHours = exports.checkWeekend = exports.convertDateTz = void 0;
+const date_holidays_1 = __importDefault(__nccwpck_require__(740));
+/**
+ * The convertDateTz cnnvert the date to the specified timezone
+ * @returns {Date}` Resolves when the action is complete.
+ */
+function convertDateTz(today, offset) {
+    // Some data validation before continuing
+    if (offset === '') {
+        throw new TypeError('Timezone offset not specified');
+    }
+    const offsetInt = parseInt(offset, 10) * 3600000;
+    if (isNaN(offsetInt)) {
+        throw new TypeError('Timezone offset invalid');
+    }
+    const todayTime = today.getTime();
+    const localOffset = today.getTimezoneOffset() * 60000;
+    const utcTime = todayTime + localOffset;
+    const resultTime = utcTime + offsetInt;
+    const resultDate = new Date(resultTime);
+    const resultHour = resultDate.getHours();
+    const weekday = [
+        'sunday',
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday'
+    ];
+    const resultDayOfWeekInt = resultDate.getDay();
+    const resultDayOfWeek = weekday[resultDayOfWeekInt];
+    return [resultDate, resultHour, resultDayOfWeek];
+}
+exports.convertDateTz = convertDateTz;
+/**
+ * The checkWeekend checks if the date time is within week days
+ * @returns {boolean} Resolves when the action is complete.
+ */
+function checkWeekend(dayOfWeek, noDeploymentDays) {
+    // Some data validation before continuing
+    if (dayOfWeek === '') {
+        throw new TypeError('dayOfWeek not properly defined');
+    }
+    if (noDeploymentDays === '') {
+        throw new TypeError('noDeploymentDays is not properly defined');
+    }
+    const noDeploymentDaysCommas = `,${noDeploymentDays.toLowerCase()},`;
+    const result = noDeploymentDaysCommas.includes(`,${dayOfWeek.toLowerCase()},`);
+    return result;
+}
+exports.checkWeekend = checkWeekend;
+/**
+ * The checkOfficeHours checks if the date time is within office hours
+ * @returns {boolean} Resolves when the action is complete.
+ */
+function checkOfficeHours(nowHour, officeHoursStart, officeHoursEnd) {
+    // Some data validation before continuing
+    if (officeHoursStart === '' || officeHoursEnd === '') {
+        throw new TypeError('Either office hours start or end is not defined');
+    }
+    const officeHoursStartInt = parseInt(officeHoursStart, 10);
+    const officeHoursEndInt = parseInt(officeHoursEnd, 10);
+    if (isNaN(nowHour) ||
+        isNaN(officeHoursStartInt) ||
+        isNaN(officeHoursEndInt)) {
+        throw new TypeError('Either nowHour or office hours start or end is not a number');
+    }
+    if (nowHour <= officeHoursStartInt || nowHour >= officeHoursEndInt) {
+        return false;
+    }
+    return true;
+}
+exports.checkOfficeHours = checkOfficeHours;
+/**
+ * The checkHolidays checks if the date time is correct
+ * @returns {boolean}` Resolves when the action is complete.
+ */
+function checkHolidays(tzToday, country, state, region) {
+    // Some data validation before continuing
+    if (!(tzToday instanceof Date) || isNaN(tzToday.getTime())) {
+        throw new TypeError('today is not a date');
+    }
+    const h = new date_holidays_1.default(country, state, region);
+    const isTodayHoliday = h.isHoliday(tzToday);
+    return isTodayHoliday !== false;
+}
+exports.checkHolidays = checkHolidays;
+
+
+/***/ }),
+
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -36160,14 +36261,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-const date_holidays_1 = __importDefault(__nccwpck_require__(740));
+const check_1 = __nccwpck_require__(682);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -36204,53 +36302,25 @@ async function run() {
         // Log the current timestamp
         const today = new Date();
         core.info(`today: "${today.toISOString()}"`);
+        const [todayDate, todayHour, dayOfWeek] = (0, check_1.convertDateTz)(today, tz);
         // check if day of week is one of the noDeploymentDays
-        if (tz !== '' && noDeploymentDays !== '') {
-            // convert to timezone
-            const tzTodayDay = today.toLocaleString('en-US', {
-                timeZone: tz,
-                weekday: 'long'
-            });
-            core.info(`tzTodayDay: "${tzTodayDay}"`);
-            const noDeploymentDaysCommas = `,${noDeploymentDays.toLowerCase()},`;
-            const foundDeploymentDay = noDeploymentDaysCommas.includes(`,${tzTodayDay.toLowerCase()},`);
-            core.debug(`foundDeploymentDay: "${foundDeploymentDay}"`);
-            if (foundDeploymentDay) {
-                // We found it in a noDeploymentDays
-                core.setOutput('reason', `Do not deploy on a no deployment day, ${noDeploymentDays}`);
-                core.setOutput(`should_deploy`, false);
-                return;
-            }
+        if ((0, check_1.checkWeekend)(dayOfWeek, noDeploymentDays)) {
+            // We found it in a noDeploymentDays
+            core.setOutput('reason', `Do not deploy on a no deployment day, ${noDeploymentDays}`);
+            core.setOutput(`should_deploy`, false);
+            return;
         }
         // check if officeHoursEnd and officeHoursStart are defined
-        if (tz !== '' && officeHoursStart !== '' && officeHoursEnd !== '') {
-            const officeHoursStartInt = parseInt(officeHoursStart, 10);
-            const officeHoursEndInt = parseInt(officeHoursEnd, 10);
-            // check if in officeHours
-            const todayHour = today.toLocaleString('en-US', {
-                timeZone: tz,
-                hourCycle: 'h23',
-                hour: '2-digit'
-            });
-            // validate the input officeHoursStart and officeHoursEnd
-            const todayHourInt = parseInt(todayHour, 10);
-            core.debug(`Check if "${todayHour}" is in office hour "${officeHoursStart}"-"${officeHoursEnd}"`);
-            if (todayHourInt <= officeHoursStartInt ||
-                todayHourInt >= officeHoursEndInt) {
-                core.setOutput('reason', `Do not deploy outside the office hours from ${officeHoursStart} to ${officeHoursEnd} on a weekday`);
-                core.setOutput(`should_deploy`, false);
-                return;
-            }
+        if (!(0, check_1.checkOfficeHours)(todayHour, officeHoursStart, officeHoursEnd)) {
+            core.setOutput('reason', `Do not deploy outside the office hours from ${officeHoursStart} to ${officeHoursEnd} on a weekday`);
+            core.setOutput(`should_deploy`, false);
+            return;
         }
         // check if we are in a holiday for country
-        if (country !== '') {
-            const h = new date_holidays_1.default(country, state, region);
-            const isTodayHoliday = h.isHoliday(today);
-            if (isTodayHoliday) {
-                core.setOutput('reason', `Do not deploy a holiday for ${country}`);
-                core.setOutput(`should_deploy`, false);
-                return;
-            }
+        if (country !== '' && !(0, check_1.checkHolidays)(todayDate, country, state, region)) {
+            core.setOutput('reason', `Do not deploy a holiday for ${country}`);
+            core.setOutput(`should_deploy`, false);
+            return;
         }
         core.setOutput('reason', 'Proceed with deploy');
         core.setOutput(`should_deploy`, true);

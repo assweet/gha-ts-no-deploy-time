@@ -19,11 +19,12 @@ inputs:
     default: 'Friday,Saturday,Sunday'
   tz:
     description:
-      'Time zone in the format (Continent/Country) - eg. Asia/Singapore'
+      'Time zone in the format (+/-offset), eg. +8 for Singapore or -5 for Los
+      Angeles'
     required: true
-    default: 'Asia/Singapore'
+    default: '+8'
   country:
-    description: 'Country in ISO 2 character'
+    description: 'Country in ISO 2 character - used for holidays'
     required: false
     default: 'SG'
   state:

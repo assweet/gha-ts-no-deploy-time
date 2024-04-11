@@ -1,6 +1,11 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import Holidays from 'date-holidays'
+import {
+  checkHolidays,
+  checkOfficeHours,
+  checkWeekend,
+  convertDateTz
+} from './check'
 
 /**
  * The main function for the action.
@@ -41,67 +46,32 @@ export async function run(): Promise<void> {
     // Log the current timestamp
     const today: Date = new Date()
     core.info(`today: "${today.toISOString()}"`)
+    const [todayDate, todayHour, dayOfWeek] = convertDateTz(today, tz)
 
     // check if day of week is one of the noDeploymentDays
-    if (tz !== '' && noDeploymentDays !== '') {
-      // convert to timezone
-      const tzTodayDay = today.toLocaleString('en-US', {
-        timeZone: tz,
-        weekday: 'long'
-      })
-      core.info(`tzTodayDay: "${tzTodayDay}"`)
-      const noDeploymentDaysCommas = `,${noDeploymentDays.toLowerCase()},`
-      const foundDeploymentDay: boolean = noDeploymentDaysCommas.includes(
-        `,${tzTodayDay.toLowerCase()},`
+    if (checkWeekend(dayOfWeek, noDeploymentDays)) {
+      // We found it in a noDeploymentDays
+      core.setOutput(
+        'reason',
+        `Do not deploy on a no deployment day, ${noDeploymentDays}`
       )
-      core.debug(`foundDeploymentDay: "${foundDeploymentDay}"`)
-      if (foundDeploymentDay) {
-        // We found it in a noDeploymentDays
-        core.setOutput(
-          'reason',
-          `Do not deploy on a no deployment day, ${noDeploymentDays}`
-        )
-        core.setOutput(`should_deploy`, false)
-        return
-      }
+      core.setOutput(`should_deploy`, false)
+      return
     }
     // check if officeHoursEnd and officeHoursStart are defined
-    if (tz !== '' && officeHoursStart !== '' && officeHoursEnd !== '') {
-      const officeHoursStartInt: number = parseInt(officeHoursStart, 10)
-      const officeHoursEndInt: number = parseInt(officeHoursEnd, 10)
-      // check if in officeHours
-      const todayHour = today.toLocaleString('en-US', {
-        timeZone: tz,
-        hourCycle: 'h23',
-        hour: '2-digit'
-      })
-      // validate the input officeHoursStart and officeHoursEnd
-      const todayHourInt: number = parseInt(todayHour, 10)
-      core.debug(
-        `Check if "${todayHour}" is in office hour "${officeHoursStart}"-"${officeHoursEnd}"`
+    if (!checkOfficeHours(todayHour, officeHoursStart, officeHoursEnd)) {
+      core.setOutput(
+        'reason',
+        `Do not deploy outside the office hours from ${officeHoursStart} to ${officeHoursEnd} on a weekday`
       )
-
-      if (
-        todayHourInt <= officeHoursStartInt ||
-        todayHourInt >= officeHoursEndInt
-      ) {
-        core.setOutput(
-          'reason',
-          `Do not deploy outside the office hours from ${officeHoursStart} to ${officeHoursEnd} on a weekday`
-        )
-        core.setOutput(`should_deploy`, false)
-        return
-      }
+      core.setOutput(`should_deploy`, false)
+      return
     }
     // check if we are in a holiday for country
-    if (country !== '') {
-      const h = new Holidays(country, state, region)
-      const isTodayHoliday = h.isHoliday(today)
-      if (isTodayHoliday) {
-        core.setOutput('reason', `Do not deploy a holiday for ${country}`)
-        core.setOutput(`should_deploy`, false)
-        return
-      }
+    if (country !== '' && !checkHolidays(todayDate, country, state, region)) {
+      core.setOutput('reason', `Do not deploy a holiday for ${country}`)
+      core.setOutput(`should_deploy`, false)
+      return
     }
     core.setOutput('reason', 'Proceed with deploy')
     core.setOutput(`should_deploy`, true)
