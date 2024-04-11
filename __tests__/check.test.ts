@@ -73,8 +73,9 @@ describe('check.ts', () => {
   })
   // convertTZ
   it('convertDateTz with valid timezone', async () => {
-    const date: Date = new Date('2024-04-10 12:00:00 GMT+0800')
+    const date: Date = new Date('Wed Apr 10 2024 12:00:00 GMT+0800')
     const [resultDate, resultHour, resultDayOfWeek] = convertDateTz(date, '+8')
+    console.log(`date = ${date}`)
     console.log(`offset = ${date.getTimezoneOffset()}`)
 
     expect(resultDate.getTime()).toEqual(date.getTime())
@@ -84,6 +85,8 @@ describe('check.ts', () => {
   it('convertDateTz with different timezone', async () => {
     const date: Date = new Date('2024-04-10 12:00:00 GMT+0800')
     const [resultDate, resultHour, resultDayOfWeek] = convertDateTz(date, '-5')
+    console.log(`date = ${date}`)
+    console.log(`offset = ${date.getTimezoneOffset()}`)
 
     expect(resultDate.getTime()).toBeLessThan(date.getTime())
     expect(resultHour).toEqual(23)
