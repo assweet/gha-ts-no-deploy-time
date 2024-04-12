@@ -36310,6 +36310,7 @@ async function run() {
         const today = new Date();
         core.info(`today: "${today.toISOString()}"`);
         const [todayDate, todayHour, dayOfWeek] = (0, check_1.convertDateTz)(today, tz);
+        core.setOutput('debug', `convertDateTz returns [${todayDate}, ${todayHour}, ${dayOfWeek}]`);
         // check if day of week is one of the noDeploymentDays
         if ((0, check_1.checkWeekend)(dayOfWeek, noDeploymentDays)) {
             // We found it in a noDeploymentDays
