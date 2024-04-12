@@ -68,7 +68,7 @@ jobs:
 
       - name: Print Output
         id: output
-        run:
-          echo "reason=${{ steps.test-action.outputs.reason }} -
-          debug=${{steps.test-action.outputs.debug}}"
-          should_deploy=${{steps.test-action.outputs.should_deploy }}"
+        run: |
+          echo "reason=${{ steps.test-action.outputs.reason}}"
+          echo "debug=${{steps.test-action.outputs.debug}}"
+          echo "should_deploy=${{steps.test-action.outputs.should_deploy}}"
