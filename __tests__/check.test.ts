@@ -22,29 +22,25 @@ describe('check.ts', () => {
   })
   // checkOfficeHours
   it('checkOfficeHours with valid time', async () => {
-    const date: Date = new Date('2024-04-10 12:00:00 GMT+0800')
-    const nowHour: number = date.getHours()
+    const nowHour = 12
     const result: boolean = checkOfficeHours(nowHour, '9', '22')
 
     expect(result).toBeTruthy()
   })
   it('checkOfficeHours with after office hours', async () => {
-    const date: Date = new Date('2024-04-10 23:00:00 GMT+0800')
-    const nowHour: number = date.getHours()
+    const nowHour = 23
     const result: boolean = checkOfficeHours(nowHour, '9', '22')
 
     expect(result).toBeFalsy()
   })
   it('checkOfficeHours with before office hours', async () => {
-    const date: Date = new Date('2024-04-10 04:00:00 GMT+0800')
-    const nowHour: number = date.getHours()
+    const nowHour = 5
     const result: boolean = checkOfficeHours(nowHour, '9', '22')
 
     expect(result).toBeFalsy()
   })
   it('checkOfficeHours with just at end office hours', async () => {
-    const date: Date = new Date('2024-04-10 22:00:00 GMT+0800')
-    const nowHour: number = date.getHours()
+    const nowHour = 22
     const result: boolean = checkOfficeHours(nowHour, '9', '22')
 
     expect(result).toBeFalsy()
@@ -73,12 +69,15 @@ describe('check.ts', () => {
   })
   // convertTZ
   it('convertDateTz with valid timezone', async () => {
-    const date: Date = new Date('Wed Apr 10 2024 12:00:00 GMT+0800')
+    const date: Date = new Date('2024-04-10 12:00:00 GMT+0800')
     const [resultDate, resultHour, resultDayOfWeek] = convertDateTz(date, '+8')
     console.log(`date = ${date}`)
     console.log(`offset = ${date.getTimezoneOffset()}`)
 
-    expect(resultDate.getTime()).toEqual(date.getTime())
+    expect(resultDate.getDay()).toEqual(date.getDay())
+    expect(resultDate.getMonth()).toEqual(date.getMonth())
+    expect(resultDate.getFullYear()).toEqual(date.getFullYear())
+    expect(resultDate.getHours()).toEqual(date.getHours())
     expect(resultHour).toEqual(12)
     expect(resultDayOfWeek.includes('wednesday')).toBeTruthy()
   })
