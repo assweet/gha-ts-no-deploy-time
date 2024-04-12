@@ -37,7 +37,7 @@ export async function run(): Promise<void> {
     // Run this only for events listed in eventTypes
     const eventName = `,${github.context.eventName.trim().toLowerCase()},`
     const eventTypesComma = `,${eventTypes.trim().toLowerCase()},`
-    if (eventTypesComma.includes(eventName)) {
+    if (!eventTypesComma.includes(eventName)) {
       core.setOutput('reason', 'Should Deploy')
       core.setOutput('should_deploy', true)
       return
