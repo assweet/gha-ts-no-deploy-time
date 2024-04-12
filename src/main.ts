@@ -46,10 +46,10 @@ export async function run(): Promise<void> {
     // Log the current timestamp
     const today: Date = new Date()
     core.info(`today: "${today.toISOString()}"`)
-    const [todayDate, todayHour, dayOfWeek] = convertDateTz(today, tz)
+    const [todayHour, dayOfWeek] = convertDateTz(today, tz)
     core.setOutput(
       'debug',
-      `convertDateTz returns [${todayDate}, ${todayHour}, ${dayOfWeek}]`
+      `convertDateTz returns [${today}, ${todayHour}, ${dayOfWeek}]`
     )
 
     // check if day of week is one of the noDeploymentDays
@@ -72,7 +72,7 @@ export async function run(): Promise<void> {
       return
     }
     // check if we are in a holiday for country
-    if (country !== '' && !checkHolidays(todayDate, country, state, region)) {
+    if (country !== '' && !checkHolidays(today, country, state, region)) {
       core.setOutput('reason', `Do not deploy a holiday for ${country}`)
       core.setOutput(`should_deploy`, false)
       return

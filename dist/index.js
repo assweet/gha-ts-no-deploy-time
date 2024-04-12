@@ -36157,14 +36157,17 @@ function convertDateTz(today, offset) {
     if (isNaN(offsetInt)) {
         throw new TypeError('Timezone offset invalid');
     }
-    const adjustedOffsetInt = offsetInt * 3600000;
-    const todayTime = today.getTime();
-    const localOffset = today.getTimezoneOffset() * 60000;
-    const utcTime = todayTime + localOffset;
-    const resultTime = utcTime + adjustedOffsetInt;
-    const resultDate = new Date(resultTime);
-    const resultHour = resultDate.getHours();
-    const altResultHour = resultDate.getUTCHours() + offsetInt;
+    const todayUTCHour = today.getUTCHours();
+    let resultDayOfWeekInt = today.getUTCDay();
+    let resultHour = todayUTCHour + offsetInt;
+    if (resultHour < 0) {
+        resultDayOfWeekInt = resultDayOfWeekInt - 1;
+        resultHour = resultHour + 24;
+    }
+    else if (resultHour > 24) {
+        resultDayOfWeekInt = resultDayOfWeekInt + 1;
+        resultHour = resultHour - 24;
+    }
     const weekday = [
         'sunday',
         'monday',
@@ -36174,13 +36177,9 @@ function convertDateTz(today, offset) {
         'friday',
         'saturday'
     ];
-    const resultDayOfWeekInt = resultDate.getDay();
     const resultDayOfWeek = weekday[resultDayOfWeekInt];
-    // core.info(`convertDateTz returns [${resultDate}, ${resultHour}, ${resultDayOfWeek}]`)
-    // core.info(`convertDateTz has ${altResultHour}`)
-    console.log(`convertDateTz returns [${resultDate}, ${resultHour}, ${resultDayOfWeek}]`);
-    console.log(`convertDateTz has alternate ${resultDate.getUTCHours()} - ${altResultHour}`);
-    return [resultDate, resultHour, resultDayOfWeek];
+    console.log(`convertDateTz returns [${resultHour}, ${resultDayOfWeek}]`);
+    return [resultHour, resultDayOfWeek];
 }
 exports.convertDateTz = convertDateTz;
 /**
@@ -36309,8 +36308,8 @@ async function run() {
         // Log the current timestamp
         const today = new Date();
         core.info(`today: "${today.toISOString()}"`);
-        const [todayDate, todayHour, dayOfWeek] = (0, check_1.convertDateTz)(today, tz);
-        core.setOutput('debug', `convertDateTz returns [${todayDate}, ${todayHour}, ${dayOfWeek}]`);
+        const [todayHour, dayOfWeek] = (0, check_1.convertDateTz)(today, tz);
+        core.setOutput('debug', `convertDateTz returns [${today}, ${todayHour}, ${dayOfWeek}]`);
         // check if day of week is one of the noDeploymentDays
         if ((0, check_1.checkWeekend)(dayOfWeek, noDeploymentDays)) {
             // We found it in a noDeploymentDays
@@ -36325,7 +36324,7 @@ async function run() {
             return;
         }
         // check if we are in a holiday for country
-        if (country !== '' && !(0, check_1.checkHolidays)(todayDate, country, state, region)) {
+        if (country !== '' && !(0, check_1.checkHolidays)(today, country, state, region)) {
             core.setOutput('reason', `Do not deploy a holiday for ${country}`);
             core.setOutput(`should_deploy`, false);
             return;

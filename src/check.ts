@@ -5,10 +5,7 @@ import Holidays from 'date-holidays'
  * The convertDateTz cnnvert the date to the specified timezone
  * @returns {Date}` Resolves when the action is complete.
  */
-export function convertDateTz(
-  today: Date,
-  offset: string
-): [Date, number, string] {
+export function convertDateTz(today: Date, offset: string): [number, string] {
   // Some data validation before continuing
   if (offset === '') {
     throw new TypeError('Timezone offset not specified')
@@ -17,15 +14,16 @@ export function convertDateTz(
   if (isNaN(offsetInt)) {
     throw new TypeError('Timezone offset invalid')
   }
-  const adjustedOffsetInt: number = offsetInt * 3600000
-  const todayTime: number = today.getTime()
-  const localOffset: number = today.getTimezoneOffset() * 60000
-  const utcTime: number = todayTime + localOffset
-  const resultTime: number = utcTime + adjustedOffsetInt
-  const resultDate: Date = new Date(resultTime)
-
-  const resultHour: number = resultDate.getHours()
-  const altResultHour: number = resultDate.getUTCHours() + offsetInt
+  const todayUTCHour: number = today.getUTCHours()
+  let resultDayOfWeekInt: number = today.getUTCDay()
+  let resultHour: number = todayUTCHour + offsetInt
+  if (resultHour < 0) {
+    resultDayOfWeekInt = resultDayOfWeekInt - 1
+    resultHour = resultHour + 24
+  } else if (resultHour > 24) {
+    resultDayOfWeekInt = resultDayOfWeekInt + 1
+    resultHour = resultHour - 24
+  }
   const weekday: string[] = [
     'sunday',
     'monday',
@@ -35,18 +33,10 @@ export function convertDateTz(
     'friday',
     'saturday'
   ]
-  const resultDayOfWeekInt: number = resultDate.getDay()
   const resultDayOfWeek: string = weekday[resultDayOfWeekInt]
-  // core.info(`convertDateTz returns [${resultDate}, ${resultHour}, ${resultDayOfWeek}]`)
-  // core.info(`convertDateTz has ${altResultHour}`)
-  console.log(
-    `convertDateTz returns [${resultDate}, ${resultHour}, ${resultDayOfWeek}]`
-  )
-  console.log(
-    `convertDateTz has alternate ${resultDate.getUTCHours()} - ${altResultHour}`
-  )
+  console.log(`convertDateTz returns [${resultHour}, ${resultDayOfWeek}]`)
 
-  return [resultDate, resultHour, resultDayOfWeek]
+  return [resultHour, resultDayOfWeek]
 }
 
 /**
