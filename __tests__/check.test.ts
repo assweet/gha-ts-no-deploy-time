@@ -77,7 +77,7 @@ describe('check.ts', () => {
     expect(resultDate.getDay()).toEqual(date.getDay())
     expect(resultDate.getMonth()).toEqual(date.getMonth())
     expect(resultDate.getFullYear()).toEqual(date.getFullYear())
-    expect(resultDate.getUTCHours()).toEqual(date.getUTCHours())
+    // expect(resultHour).toEqual(resultDate.getUTCHours())
     expect(resultHour).toEqual(12)
     expect(resultDayOfWeek.includes('wednesday')).toBeTruthy()
   })

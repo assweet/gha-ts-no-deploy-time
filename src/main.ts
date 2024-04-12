@@ -47,6 +47,8 @@ export async function run(): Promise<void> {
     const today: Date = new Date()
     core.info(`today: "${today.toISOString()}"`)
     const [todayDate, todayHour, dayOfWeek] = convertDateTz(today, tz)
+    core.setOutput('debug',
+        `convertDateTz returns [${todayDate}, ${todayHour}, ${dayOfWeek}]`)
 
     // check if day of week is one of the noDeploymentDays
     if (checkWeekend(dayOfWeek, noDeploymentDays)) {

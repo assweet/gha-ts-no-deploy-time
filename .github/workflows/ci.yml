@@ -70,4 +70,5 @@ jobs:
         id: output
         run:
           echo "reason=${{ steps.test-action.outputs.reason }} -
+          debug=${{steps.test-action.outputs.debug}}"
           should_deploy=${{steps.test-action.outputs.should_deploy }}"
