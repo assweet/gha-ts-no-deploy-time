@@ -1,4 +1,4 @@
-import * as core from '@actions/core'
+// import * as core from '@actions/core'
 import Holidays from 'date-holidays'
 
 /**
@@ -39,8 +39,12 @@ export function convertDateTz(
   const resultDayOfWeek: string = weekday[resultDayOfWeekInt]
   // core.info(`convertDateTz returns [${resultDate}, ${resultHour}, ${resultDayOfWeek}]`)
   // core.info(`convertDateTz has ${altResultHour}`)
-  console.log(`convertDateTz returns [${resultDate}, ${resultHour}, ${resultDayOfWeek}]`)
-  console.log(`convertDateTz has alternate ${resultDate.getUTCHours()} - ${altResultHour}`)
+  console.log(
+    `convertDateTz returns [${resultDate}, ${resultHour}, ${resultDayOfWeek}]`
+  )
+  console.log(
+    `convertDateTz has alternate ${resultDate.getUTCHours()} - ${altResultHour}`
+  )
 
   return [resultDate, resultHour, resultDayOfWeek]
 }
