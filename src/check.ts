@@ -13,17 +13,19 @@ export function convertDateTz(
   if (offset === '') {
     throw new TypeError('Timezone offset not specified')
   }
-  const offsetInt: number = parseInt(offset, 10) * 3600000
+  const offsetInt: number = parseInt(offset, 10)
   if (isNaN(offsetInt)) {
     throw new TypeError('Timezone offset invalid')
   }
+  const adjustedOffsetInt: number = offsetInt * 3600000
   const todayTime: number = today.getTime()
   const localOffset: number = today.getTimezoneOffset() * 60000
   const utcTime: number = todayTime + localOffset
-  const resultTime: number = utcTime + offsetInt
+  const resultTime: number = utcTime + adjustedOffsetInt
   const resultDate: Date = new Date(resultTime)
 
   const resultHour: number = resultDate.getHours()
+  const altResultHour: number = resultDate.getUTCHours() + offsetInt
   const weekday: string[] = [
     'sunday',
     'monday',
@@ -35,9 +37,10 @@ export function convertDateTz(
   ]
   const resultDayOfWeekInt: number = resultDate.getDay()
   const resultDayOfWeek: string = weekday[resultDayOfWeekInt]
-  core.info(
-    `convertDateTz returns [${resultDate}, ${resultHour}, ${resultDayOfWeek}]`
-  )
+  // core.info(`convertDateTz returns [${resultDate}, ${resultHour}, ${resultDayOfWeek}]`)
+  // core.info(`convertDateTz has ${altResultHour}`)
+  console.log(`convertDateTz returns [${resultDate}, ${resultHour}, ${resultDayOfWeek}]`)
+  console.log(`convertDateTz has alternate ${resultDate.getUTCHours()} - ${altResultHour}`)
 
   return [resultDate, resultHour, resultDayOfWeek]
 }
