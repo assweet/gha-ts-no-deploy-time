@@ -36324,7 +36324,7 @@ async function run() {
             return;
         }
         // check if we are in a holiday for country
-        if (country !== '' && !(0, check_1.checkHolidays)(today, country, state, region)) {
+        if (country !== '' && (0, check_1.checkHolidays)(today, country, state, region)) {
             core.setOutput('reason', `Do not deploy a holiday for ${country}`);
             core.setOutput(`should_deploy`, false);
             return;

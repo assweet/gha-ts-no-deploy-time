@@ -72,7 +72,7 @@ export async function run(): Promise<void> {
       return
     }
     // check if we are in a holiday for country
-    if (country !== '' && !checkHolidays(today, country, state, region)) {
+    if (country !== '' && checkHolidays(today, country, state, region)) {
       core.setOutput('reason', `Do not deploy a holiday for ${country}`)
       core.setOutput(`should_deploy`, false)
       return
